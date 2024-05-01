@@ -38,3 +38,22 @@ body, h1, h2, h3, h4, h5, h6 {
     background-color: #04AA6D;
     color: white;
   }
+section {
+    padding: 20px;
+}
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+  }
+  .card {
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    font-size: small;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: top;
+    margin: 20px;
+    flex: 0 1 calc(50% - 40px);
+  }
