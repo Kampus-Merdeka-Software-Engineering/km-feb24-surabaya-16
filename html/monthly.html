@@ -28,8 +28,8 @@
                         </div>
                     </div>
                 </a>
-                <a class="topnav-button-position topnav-a topnav-hover" href="monthly.html"> Monthly Sales</a>
-                <a class="topnav-button-position topnav-a-active topnav-hover" href="index.html">Yearly Sales</a>
+                <a class="topnav-button-position topnav-a-active topnav-hover" href="monthly.html"> Monthly Sales</a>
+                <a class="topnav-button-position topnav-a topnav-hover" href="index.html">Yearly Sales</a>
             </div>
 
             <!--FILTER-->
@@ -104,6 +104,35 @@
             </div>
         </div>
     </section>
+    <!-- Include Google API Client Library -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        // Inisialisasi klien BigQuery
+        gapi.load('client', function () {
+            gapi.client.init({
+                apiKey: 'YOUR_API_KEY', // Ganti dengan API key Anda
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest']
+            }).then(function () {
+                // Membuat permintaan SQL untuk mengambil data dari BigQuery
+                var request = gapi.client.request({
+                    'path': '/bigquery/v2/projects/YOUR_PROJECT_ID/queries',
+                    'method': 'POST',
+                    'body': {
+                        'query': 'SELECT * FROM `your_project_id.your_dataset_id.your_table_id` LIMIT 10'
+                    }
+                });
+
+                // Menjalankan permintaan
+                request.execute(function (response) {
+                    // Mengolah data JSON dari respons
+                    var data = response.result.rows;
+                    console.log(data); // Tampilkan data ke konsol
+
+                    // Lakukan sesuatu dengan data, misalnya membuat visualisasi menggunakan Chart.js
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
