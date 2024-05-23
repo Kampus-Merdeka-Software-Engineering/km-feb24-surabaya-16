@@ -1,0 +1,113 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    
+</head>
+  
+<body>
+    <section>
+        <div class="container">
+            <!--Header-->
+            <div class="topnav header">
+                <a class="topnav-logo"><img class="image-responsive" src="assets/logo-header-resized-120px.png" alt="Logo Perusahaan"></a>
+                <a class="topnav-special">
+                    <div>
+                        <div class="kotak">
+                            <h1 class="font-weight-bold">
+                                Superstore Monthly Sales Performance Overview
+                            </h1>
+                        </div>
+                        <div>
+                            <img class="image-responsive" src="assets/Rectangle 205.png" alt="garis">
+                        </div>
+                    </div>
+                </a>
+                <a class="topnav-button-position topnav-a-active topnav-hover" href="monthly.html"> Monthly Sales</a>
+                <a class="topnav-button-position topnav-a topnav-hover" href="index.html">Yearly Sales</a>
+            </div>
+
+            <!--FILTER-->
+            <div class="sections">
+                 <!--BUTTON DOWNLOAD PDF-->
+                <div class="#">
+                    <button class="button">Download PDF</button>
+                </div>
+
+                 <!--DROPDOWN STATE-->
+                <div class="select">
+                    <select name="state" id="state">
+                        <option value="#">California</option>
+                        <option value="#">New York City</option>
+                    </select>
+                </div>
+                
+                 <!--DROPDOWN CATEGORY-->
+                <div class="select">
+                    <select name="category" id="state">
+                        <option value="#">Office Supply</option>
+                        <option value="#">Furniture</option>
+                        <option value="#">Technology</option>
+                    </select>
+                </div>
+
+                 <!--DROPDPWN SEGMENT-->
+                <div class="select">
+                    <select name="segment" id="state">
+                        <option value="#">Consumer</option>
+                        <option value="#">Corporate</option>
+                        <option value="#">Home Office</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="skorcard"> 
+            <div class="cards">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-name">Total Order</div>
+                        <div class="number">5.0 rb</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-name">Sales</div>
+                        <div class="number">$130,68 jt</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-name">Profit</div>
+                        <div class="number">$23,91 jt</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-name">Profit Ratio</div>
+                        <div class="number">18 %</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chartContainer">
+            <div class="left">
+                <h2>State with the highest sales</h2>
+                <div><canvas id="BarChartStateHighestSales"></canvas></div>
+        </div>
+        <div class="chartContainer">
+            <div class="right">
+                <h2>State with the highest profit</h2>
+                <div><canvas id="BarChartStateHighestProfit"></canvas></div>
+        </div>
+    </section>
+    
+</body>
+  
+</html>
