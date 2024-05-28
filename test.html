@@ -44,7 +44,7 @@
                 </div>
                 <!--SHOW RAW DATA-->
                 <div class="#">
-                    <button type="button" class="button" data-toggle="modal" data-target="#dataTableModal">Show Data</button>
+                    <button type="button" class="button" id="clickModal" data-toggle="modal" data-target="#dataTableModal">Show Data</button>
                 </div>
 
                  <!--DROPDOWN STATE-->
@@ -909,57 +909,67 @@ function filterTreeMapChart() {
  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
  <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
  <script>
-     $(document).ready(function() {
-        let dataTableInitialized = false;
+    document.getElementById('clickModal').addEventListener('click', function () {
+            const password = prompt('Enter password:');
+            
+          
+            if (password === 'team16') {
+                $(document).ready(function() {
+                    let dataTableInitialized = false;
 
-         function initializeDataTable(data) {
-             $('#dataTable').DataTable({
-                 data: data,
-                 columns: [
-                     { data: 'Order ID' },
-                     { data: 'Order Date' },
-                     { data: 'Ship Date' },
-                     { data: 'Ship Mode' },
-                     { data: 'Customer ID' },
-                     { data: 'Customer Name' },
-                     { data: 'Segment' },
-                     { data: 'Country' },
-                     { data: 'City' },
-                     { data: 'State' },
-                     { data: 'Postal Code' },
-                     { data: 'Region' },
-                     { data: 'Product ID' },
-                     { data: 'Category' },
-                     { data: 'Sub-Category' },
-                     { data: 'Product Name' },
-                     { data: 'Sales' },
-                     { data: 'Quantity' },
-                     { data: 'Discount' },
-                     { data: 'Profit' }
-                 ],
-                 pageLength: 5, 
-                 lengthMenu: [5, 10, 15, 30], 
-                 responsive: true,
-                 scrollX: true // Enable horizontal scrolling
+                    function initializeDataTable(data) {
+                        $('#dataTable').DataTable({
+                            data: data,
+                            columns: [
+                                { data: 'Order ID' },
+                                { data: 'Order Date' },
+                                { data: 'Ship Date' },
+                                { data: 'Ship Mode' },
+                                { data: 'Customer ID' },
+                                { data: 'Customer Name' },
+                                { data: 'Segment' },
+                                { data: 'Country' },
+                                { data: 'City' },
+                                { data: 'State' },
+                                { data: 'Postal Code' },
+                                { data: 'Region' },
+                                { data: 'Product ID' },
+                                { data: 'Category' },
+                                { data: 'Sub-Category' },
+                                { data: 'Product Name' },
+                                { data: 'Sales' },
+                                { data: 'Quantity' },
+                                { data: 'Discount' },
+                                { data: 'Profit' }
+                            ],
+                            pageLength: 5, 
+                            lengthMenu: [5, 10, 15, 30], 
+                            responsive: true,
+                            scrollX: true // Enable horizontal scrolling
+                        });
+                        dataTableInitialized = true;
+                    }
+
+                    // Fetch data and initialize DataTable when modal is shown
+                    
+                    $('#dataTableModal').on('shown.bs.modal', function () {
+                    if (!dataTableInitialized) { 
+                        fetchData(DataUrl).then(data => {
+                            initializeDataTable(data);
+                        });
+                    } else {
+                        $('#dataTable').DataTable().clear().draw();
+                        fetchData(DataUrl).then(data => {
+                            $('#dataTable').DataTable().rows.add(data).draw();
+                        });
+                    }
+                });
              });
-             dataTableInitialized = true;
-         }
-
-         // Fetch data and initialize DataTable when modal is shown
-        
-         $('#dataTableModal').on('shown.bs.modal', function () {
-        if (!dataTableInitialized) { 
-            fetchData(DataUrl).then(data => {
-                initializeDataTable(data);
-            });
-        } else {
-            $('#dataTable').DataTable().clear().draw();
-            fetchData(DataUrl).then(data => {
-                $('#dataTable').DataTable().rows.add(data).draw();
-            });
-        }
+            } else {
+                
+            }
     });
-     });
+     
  </script>
 
 <script src="https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js"></script>
