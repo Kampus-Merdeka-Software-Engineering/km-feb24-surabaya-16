@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="salesChart" width="400" height="200"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>
+
+<script>
+  const DataUrl = 'http://localhost:3000/data';
+
+// Function to fetch data from the provided URL
+function fetchData(url) {
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+
+// Function to create and render the sales chart
+function createSalesChart(data) {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    // Extract necessary data for the chart
+    const labels = data.map(item => item['Product Name']);
+    const salesData = data.map(item => parseFloat(item['Sales'].replace('$', '').replace(',', '.')));
+    
+    // Create the chart
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Sales ($)',
+                data: salesData,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Fetch data and create chart
+fetchData(DataUrl).then(data => {
+    createSalesChart(data);
+});
+
+</script>
