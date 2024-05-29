@@ -106,159 +106,116 @@ function postDataCard() {
 }
 
 //------------------------------------------------- KALAU MAU TAMBAH CHART DISINI!!!!! ------------------------------------------------
-    
+//------------------------------------------------- CHART TOTAL SALES DAN PROFIT------------------------------------------------
+// Fungsi untuk menghitung total sales dan total profit
+function calculateSalesProfit(data) {
+    let totalSales = 0;
+    let totalProfit = 0;
+
+    data.forEach(item => {
+        totalSales += parseFloat(item.Sales.replace("$", "").replace(",", ""));
+        totalProfit += parseFloat(item.Profit.replace("$", "").replace(",", ""));
+    });
+
+    return {
+        totalSales: totalSales,
+        totalProfit: totalProfit
+    };
+}
+
+// Membuat chart
+async function createChart() {
+    const data = await fetchData(DataUrl);
+    const { totalSales, totalProfit } = calculateSalesProfit(data);
+
+    const ctx = document.getElementById('salesProfitChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Total Sales', 'Total Profit'],
+            datasets: [{
+                label: 'Amount ($)',
+                data: [totalSales, totalProfit],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+}
+
+// Panggil fungsi untuk membuat chart
+createChart();
 // ------------------------------------- BARCHART STATE HIGHEST SALES -------------------------------------
 // Fungsi untuk memproses data penjualan dan mendapatkan negara bagian dengan penjualan tertinggi
-function processSalesData(data) {
-    const aggregatedData = {};
+// Fetch data from the URL
+fetchData(DataUrl).then(data => {
+    if (!data) return;
 
-    data.forEach(row => {
-        const state = row.State;
-        const sales = parseFloat(row.Sales.replace(/\$/g, '').replace(/,/g, ''));
+    // Process data to aggregate sales by state
+    const stateSales = {};
 
-        if (aggregatedData[state]) {
-            aggregatedData[state] += sales;
-        } else {
-            aggregatedData[state] = sales;
+    data.forEach(order => {
+        const state = order.State;
+        const sales = parseFloat(order.Sales.replace(/[^0-9.-]+/g, ""));
+
+        if (!stateSales[state]) {
+            stateSales[state] = 0;
         }
+
+        stateSales[state] += sales;
     });
 
-    // Mengubah objek aggregatedData menjadi array untuk diurutkan
-    const sortedDataArray = Object.entries(aggregatedData).sort((a, b) => b[1] - a[1]);
+    // Convert the stateSales object into an array of [state, sales] pairs
+    const salesArray = Object.entries(stateSales);
 
-    // Mengembalikan objek yang diurutkan
-    const sortedData = {};
-    sortedDataArray.forEach(([state, sales]) => {
-        sortedData[state] = sales;
-    });
+    // Sort the array by sales in descending order and take the top 10 states
+    const top10Sales = salesArray.sort((a, b) => b[1] - a[1]).slice(0, 10);
 
-    return sortedData;
-}
+    // Separate the top 10 states and their sales into separate arrays
+    const states = top10Sales.map(item => item[0]);
+    const sales = top10Sales.map(item => item[1]);
 
-// Variabel global untuk chart
-let BarChartSales = null;
-
-// Fungsi untuk membuat bar chart
-function createBarChartSalesState(data) {
-    const ctx = document.getElementById("BarChartSalesPerState").getContext("2d");
-    if (BarChartSales != null) {
-        BarChartSales.destroy(); // Hapus chart sebelumnya jika ada
-    }
-
-    BarChartSales = new Chart(ctx, {
-        type: "bar",
+    // Create the bar chart using Chart.js
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
         data: {
-            labels: Object.keys(data), // Label adalah nama negara bagian
-            datasets: [
-                {
-                    label: "Total Sales by State",
-                    data: Object.values(data), // Data adalah total penjualan
-                    backgroundColor: 'rgba(255, 143, 0, 1)',
-                    borderColor: 'rgba(255, 143, 0, 1)',
-                    borderWidth: 1,
-                },
-            ],
+            labels: states,
+            datasets: [{
+                label: 'Sales by State',
+                data: sales,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
             scales: {
                 y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '$' + value.toLocaleString(); // Format angka menjadi dolar
-                        }
-                    }
-                },
-            },
-        },
-    });
-}
-
-// Ambil data sales dari server, proses, dan buat chart
-fetchData(DataUrl)
-    .then(data => {
-        const processedData = processSalesData(data);
-        createBarChartSalesState(processedData);
-    });
-
-// ------------------------------------- BARCHART STATE HIGHEST PROFIT -------------------------------------
-// Fungsi untuk memproses data profit dan mendapatkan profit per negara bagian
-function processProfitData(data) {
-    const aggregatedData = {};
-
-    data.forEach(row => {
-        const state = row.State;
-        const profit = parseFloat(row.Profit.replace(/\$/g, '').replace(/,/g, ''));
-
-        if (aggregatedData[state]) {
-            aggregatedData[state] += profit;
-        } else {
-            aggregatedData[state] = profit;
+                    beginAtZero: true
+                }
+            }
         }
     });
-
-    // Mengubah objek aggregatedData menjadi array untuk diurutkan
-    const sortedDataArray = Object.entries(aggregatedData).sort((a, b) => b[1] - a[1]);
-
-    // Mengembalikan objek yang diurutkan
-    const sortedData = {};
-    sortedDataArray.forEach(([state, profit]) => {
-        sortedData[state] = profit;
-    });
-
-    return sortedData;
-}
-
-// Variabel global untuk chart
-let BarChartProfit = null;
-
-// Fungsi untuk membuat bar chart
-function createBarChartProfitState(data) {
-    const ctx = document.getElementById("BarChartProfitPerState").getContext("2d");
-    if (BarChartProfit != null) {
-        BarChartProfit.destroy(); // Hapus chart sebelumnya jika ada
-    }
-
-    BarChartProfit = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: Object.keys(data), // Label adalah nama negara bagian
-            datasets: [
-                {
-                    label: "Total Profit by State",
-                    data: Object.values(data), // Data adalah total profit
-                    backgroundColor: 'rgba(0, 0, 0, 1)',
-                    borderColor: 'rgba(0, 0, 0, 1)',
-                    borderWidth: 1,
-                },
-            ],
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '$' + value.toLocaleString(); // Format angka menjadi dolar
-                        }
-                    }
-                },
-            },
-        },
-    });
-}
+});
 
 
-// Ambil data profit dari server, proses, dan buat chart
-fetchData(DataUrl)
-    .then(data => {
-        const processedData = processProfitData(data);
-        createBarChartProfitState(processedData);
-    })
 
 //-------------------------------- LINE CHART MONTHLY SALES PERFORMANCE ----------------------------------
 // Fungsi untuk memproses data penjualan bulanan
@@ -344,26 +301,203 @@ fetch(DataUrl)
     })
     .catch(error => console.error('Error fetching data:', error));
 
-//Chart Penjualan 
 
-// Function to create and render the sales chart
-function createSalesChart(data) {
-    const ctx = document.getElementById('salesChart').getContext('2d');
+//------------------------------------------------ The most Profitable and Highest Sales------------------------------------------------
+// Ambil data dari JSON
+function fetchData(url) {
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
 
-    // Extract necessary data for the chart
-    const labels = data.map(item => item['Product Name']);
-    const salesData = data.map(item => parseFloat(item['Sales'].replace('$', '').replace(',', '.')));
+// Fungsi untuk mengubah format data
+function processData(data) {
+    const products = {};
     
-    // Create the chart
+    // Loop melalui setiap item dalam data
+    data.forEach(item => {
+        const productName = item["Product Name"];
+        const profit = parseFloat(item["Profit"].replace("$", "").replace(",", ""));
+        const sales = parseFloat(item["Sales"].replace("$", "").replace(",", ""));
+        
+        // Jika nama produk sudah ada dalam objek products, tambahkan profit dan sales
+        if (products[productName]) {
+            products[productName].profit += profit;
+            products[productName].sales += sales;
+        } else { // Jika tidak, buat entri baru untuk produk tersebut
+            products[productName] = {
+                profit: profit,
+                sales: sales
+            };
+        }
+    });
+    
+    // Mengurutkan produk berdasarkan profit tertinggi
+    const sortedProducts = Object.entries(products).sort((a, b) => b[1].profit - a[1].profit).slice(0, 10);
+
+    return sortedProducts;
+}
+
+// Membuat chart
+async function createChart() {
+    const data = await fetchData(DataUrl);
+    const processedData = processData(data);
+    
+    const productNames = processedData.map(item => item[0]);
+    const profits = processedData.map(item => item[1].profit);
+    const sales = processedData.map(item => item[1].sales);
+    
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: productNames,
+            datasets: [{
+                label: 'Profit',
+                data: profits,
+                backgroundColor: 'orange',
+                borderColor: 'black',
+                borderWidth: 1
+            }, {
+                label: 'Sales',
+                data: sales,
+                backgroundColor: 'black',
+                borderColor: 'black',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    ticks: {
+                        display: false // Menyembunyikan label di sumbu x
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+}
+
+// Panggil fungsi untuk membuat chart
+createChart();
+
+//------------------------------------------------ BARCHART SUB CATEGORY TERTINGGI SALES ------------------------------------------------
+// Fetch data from the URL
+ // Fetch data from the URL
+ fetchData(DataUrl).then(data => {
+    if (!data) return;
+
+    // Process data to aggregate sales by sub-category
+    const subCategorySales = {};
+
+    data.forEach(order => {
+        const subCategory = order["Sub-Category"];
+        const sales = parseFloat(order.Sales.replace(/[^0-9.-]+/g, ""));
+
+        if (!subCategorySales[subCategory]) {
+            subCategorySales[subCategory] = 0;
+        }
+
+        subCategorySales[subCategory] += sales;
+    });
+
+    // Convert the subCategorySales object into an array of [subCategory, sales] pairs
+    const salesArray = Object.entries(subCategorySales);
+
+    // Sort the array by sales in descending order and take the top 10 sub-categories
+    const top10Sales = salesArray.sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    // Separate the top 10 sub-categories and their sales into separate arrays
+    const subCategories = top10Sales.map(item => item[0]);
+    const sales = top10Sales.map(item => item[1]);
+
+    // Create the horizontal bar chart using Chart.js
+    const ctx = document.getElementById('SubsalesChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels: subCategories,
             datasets: [{
-                label: 'Sales ($)',
-                data: salesData,
+                label: 'Sales by Sub-Category',
+                data: sales,
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+
+fetch(DataUrl)
+    .then(response => response.json())
+    .then(data => {
+        const processedDataLineChart = preprocessData(data);
+        createLineChart(processedDataLineChart);
+    })
+    .catch(error => console.error('Error fetching data:', error));
+
+
+// ------------------------------------- BARCHART STATE HIGHEST PROFIT -------------------------------------
+// Fungsi untuk memproses data profit dan mendapatkan profit per negara bagian
+// Fetch data from the URL
+fetchData(DataUrl).then(data => {
+    if (!data) return;
+
+    // Process data to aggregate profit by state
+    const stateProfit = {};
+
+    data.forEach(order => {
+        const state = order.State;
+        const profit = parseFloat(order.Profit.replace(/[^0-9.-]+/g, ""));
+
+        if (!stateProfit[state]) {
+            stateProfit[state] = 0;
+        }
+
+        stateProfit[state] += profit;
+    });
+
+    // Convert the stateProfit object into an array of [state, profit] pairs
+    const profitArray = Object.entries(stateProfit);
+
+    // Sort the array by profit in descending order and take the top 10 states
+    const top10Profit = profitArray.sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    // Separate the top 10 states and their profit into separate arrays
+    const states = top10Profit.map(item => item[0]);
+    const profits = top10Profit.map(item => item[1]);
+
+    // Create the bar chart using Chart.js
+    const ctx = document.getElementById('profitChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: states,
+            datasets: [{
+                label: 'Profit by State',
+                data: profits,
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
                 borderWidth: 1
             }]
         },
@@ -375,15 +509,7 @@ function createSalesChart(data) {
             }
         }
     });
-}
-
-// Fetch data and create chart
-fetchData(DataUrl).then(data => {
-    createSalesChart(data);
 });
-
-
-
 
 
 

@@ -3,66 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Chart</title>
+    <title>Sales and Profit Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <canvas id="salesChart" width="400" height="200"></canvas>
-    <script src="script.js"></script>
+    <canvas id="salesProfitChart" width="800" height="400"></canvas>
+
+    <script>
+        const DataUrl = 'http://localhost:3000/data';
+
+        // Ambil data dari JSON
+        function fetchData(url) {
+            return fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+
+        // Fungsi untuk menghitung total sales dan total profit
+        function calculateSalesProfit(data) {
+            let totalSales = 0;
+            let totalProfit = 0;
+
+            data.forEach(item => {
+                totalSales += parseFloat(item.Sales.replace("$", "").replace(",", ""));
+                totalProfit += parseFloat(item.Profit.replace("$", "").replace(",", ""));
+            });
+
+            return {
+                totalSales: totalSales,
+                totalProfit: totalProfit
+            };
+        }
+
+        // Membuat chart
+        async function createChart() {
+            const data = await fetchData(DataUrl);
+            const { totalSales, totalProfit } = calculateSalesProfit(data);
+
+            const ctx = document.getElementById('salesProfitChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Sales', 'Total Profit'],
+                    datasets: [{
+                        label: 'Amount ($)',
+                        data: [totalSales, totalProfit],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // Panggil fungsi untuk membuat chart
+        createChart();
+    </script>
 </body>
 </html>
-
-<script>
-  const DataUrl = 'http://localhost:3000/data';
-
-// Function to fetch data from the provided URL
-function fetchData(url) {
-    return fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-}
-
-// Function to create and render the sales chart
-function createSalesChart(data) {
-    const ctx = document.getElementById('salesChart').getContext('2d');
-
-    // Extract necessary data for the chart
-    const labels = data.map(item => item['Product Name']);
-    const salesData = data.map(item => parseFloat(item['Sales'].replace('$', '').replace(',', '.')));
-    
-    // Create the chart
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Sales ($)',
-                data: salesData,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-// Fetch data and create chart
-fetchData(DataUrl).then(data => {
-    createSalesChart(data);
-});
-
-</script>
