@@ -138,14 +138,10 @@ async function createChart() {
                 label: 'Amount ($)',
                 data: [totalSales, totalProfit],
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
+                    'orange',
+                    'black',
                 ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                ],
-                borderWidth: 1
+                
             }]
         },
         options: {
@@ -201,8 +197,8 @@ fetchData(DataUrl).then(data => {
             datasets: [{
                 label: 'Sales by State',
                 data: sales,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'orange',
+                borderColor: 'orange',
                 borderWidth: 1
             }]
         },
@@ -301,6 +297,10 @@ fetch(DataUrl)
         createLineChart(processedDataLineChart);
     })
     .catch(error => console.error('Error fetching data:', error));
+
+    //------------------------------------------------ Most Profitable Category------------------------------------------------
+// Fungsi untuk memformat data menjadi keuntungan per kategori
+
 
 
 //------------------------------------------------ The most Profitable and Highest Sales------------------------------------------------
@@ -433,8 +433,8 @@ createChart();
             datasets: [{
                 label: 'Sales by Sub-Category',
                 data: sales,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'orange',
+                borderColor: 'orange',
                 borderWidth: 1
             }]
         },
@@ -497,8 +497,8 @@ fetchData(DataUrl).then(data => {
             datasets: [{
                 label: 'Profit by State',
                 data: profits,
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                borderColor: 'rgba(153, 102, 255, 1)',
+                backgroundColor: 'black',
+                borderColor: 'black',
                 borderWidth: 1
             }]
         },

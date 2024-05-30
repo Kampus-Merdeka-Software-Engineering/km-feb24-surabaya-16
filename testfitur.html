@@ -3,83 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales and Profit Chart</title>
+    <title>Sales and Profit Line Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js" defer></script>
+    <style>
+        #chart-container {
+            position: relative;
+            height: 70vh;
+            width: 90vw;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="salesProfitChart" width="800" height="400"></canvas>
-
-    <script>
-        const DataUrl = 'http://localhost:3000/data';
-
-        // Ambil data dari JSON
-        function fetchData(url) {
-            return fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
-        }
-
-        // Fungsi untuk menghitung total sales dan total profit
-        function calculateSalesProfit(data) {
-            let totalSales = 0;
-            let totalProfit = 0;
-
-            data.forEach(item => {
-                totalSales += parseFloat(item.Sales.replace("$", "").replace(",", ""));
-                totalProfit += parseFloat(item.Profit.replace("$", "").replace(",", ""));
-            });
-
-            return {
-                totalSales: totalSales,
-                totalProfit: totalProfit
-            };
-        }
-
-        // Membuat chart
-        async function createChart() {
-            const data = await fetchData(DataUrl);
-            const { totalSales, totalProfit } = calculateSalesProfit(data);
-
-            const ctx = document.getElementById('salesProfitChart').getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Total Sales', 'Total Profit'],
-                    datasets: [{
-                        label: 'Amount ($)',
-                        data: [totalSales, totalProfit],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                    }
-                }
-            });
-        }
-
-        // Panggil fungsi untuk membuat chart
-        createChart();
-    </script>
+    <div id="chart-container">
+        <canvas id="LineChartSalesProfit"></canvas>
+    </div>
 </body>
 </html>
+
+
+<script>
+    const preprocessData = (data) => {
+       const result = {};
+
+       data.forEach(order => {
+           const date = new Date(order["Order Date"]);
+           const year = date.getFullYear();
+           const month = date.toLocaleString('default', { month: 'long' });
+
+           if (!result[year]) {
+               result[year] = {};
+           }
+
+           if (!result[year][month]) {
+               result[year][month] = { sales: 0, profit: 0 };
+           }
+
+           result[year][month].sales += parseFloat(order.Sales.replace(/[^0-9.-]+/g, ""));
+           result[year][month].profit += parseFloat(order.Profit.replace(/[^0-9.-]+/g, ""));
+       });
+
+       const sortedData = [];
+
+       Object.keys(result).sort().forEach(year => {
+           Object.keys(result[year]).sort((a, b) => new Date(`1 ${a} ${year}`) - new Date(`1 ${b} ${year}`)).forEach(month => {
+               sortedData.push({
+                   monthYear: `${month} ${year}`,
+                   sales: result[year][month].sales,
+                   profit: result[year][month].profit
+               });
+           });
+       });
+
+       return sortedData;
+   };
+
+   // Konfigurasi line chart
+   const createLineChart = (processedData) => {
+       const labelsMonthYear = processedData.map(data => data.monthYear);
+       const sales = processedData.map(data => data.sales);
+       const profits = processedData.map(data => data.profit);
+
+       const ctxLSP = document.getElementById('LineChartSalesProfit').getContext('2d');
+       new Chart(ctxLSP, {
+           type: 'line',
+           data: {
+               labels: labelsMonthYear,
+               datasets: [
+                   {
+                       label: 'Sales',
+                       data: sales,
+                       borderColor: 'rgba(75, 192, 192, 1)',
+                       borderWidth: 2,
+                       fill: false,
+                       tension: 0.2,
+                   },
+                   {
+                       label: 'Profit',
+                       data: profits,
+                       borderColor: 'rgba(153, 102, 255, 1)',
+                       borderWidth: 2,
+                       fill: false,
+                       tension: 0.2,
+                   }
+               ]
+           },
+           options: {
+               responsive: true, 
+               maintainAspectRatio: false, 
+               scales: {
+                   x: {
+                       display: true,
+                       title: {
+                           display: true,
+                           text: 'Month/Year'
+                       }
+                   },
+                   y: {
+                       display: true,
+                       title: {
+                           display: true,
+                           text: 'Amount ($)'
+                       }
+                   }
+               }
+           }
+       });
+   };
+
+   // Fetching data dari json
+   fetch(DataUrl)
+       .then(response => response.json())
+       .then(data => {
+           const processedDataLineChart = preprocessData(data);
+           createLineChart(processedDataLineChart);
+       })
+       .catch(error => console.error('Error fetching data:', error));
+
+    
+
+</script>
