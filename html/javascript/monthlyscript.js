@@ -106,6 +106,7 @@ function postDataCard() {
 }
 
 //------------------------------------------------- KALAU MAU TAMBAH CHART DISINI!!!!! ------------------------------------------------
+
 //------------------------------------------------- CHART TOTAL SALES DAN PROFIT------------------------------------------------
 // Fungsi untuk menghitung total sales dan total profit
 function calculateSalesProfit(data) {
