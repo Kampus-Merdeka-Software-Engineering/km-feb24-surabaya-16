@@ -120,17 +120,37 @@
             </div>
 
             <!-- CHART ROW 2 (ini di hapus/diganti aja) -->
-            <div class="line-chart">
-                <h2 class="font-weight-bold judul">Monthly Sales Performance</h2>
-                <div><canvas id="LineChartMonthlySales"width="400" height="100"></canvas></div>
-            </div>
-
-            <!-- CHART ROW 3 (ini di hapus/diganti aja) -->
             <div class="chartContainer">
                 <div class="left">
-                    <h2 class="font-weight-bold judul">The most Profitable Category</h2>
-                    <div><canvas id="totalCategory" width="400" height="200"></canvas></div>
-                </div>  
+                    <h2 class="font-weight-bold">Profit Per Category</h2>
+                    <table id="profitpercategory-table">
+                        <thead>
+                            <tr>
+                                <th>Ship_Mode</th>
+                                <th>Office Supplies</th>
+                                <th>Technology</th>
+                                <th>Furniture</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profitpercategory-body">
+                        <!-- Table content will be added dynamically using JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="right">
+                     <div class="line-chart">
+                    <h2 class="font-weight-bold judul">Monthly Sales Performance</h2>
+                    <div><canvas id="LineChartMonthlySales"width="400" height="100"></canvas></div>
+                    </div>
+                </div>
+               
+            </div>
+            <!-- CHART ROW 3 (ini di hapus/diganti aja) -->
+            <div class="chartContainer">
+                <div class="lwft">
+                    <h2 class="font-weight-bold judul">The most Profitable and Highest Sales</h2>
+                    <div><canvas id="totalCategory" width="800" height="400"></canvas></div>
+                </div> 
                 <div class="right">
                     <h2 class="font-weight-bold judul">The most Profitable and Highest Sales</h2>
                     <div><canvas id="myChart" width="800" height="400"></canvas></div>
