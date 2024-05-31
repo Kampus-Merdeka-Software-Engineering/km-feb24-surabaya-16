@@ -3,101 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Total Profit and Sales by Category</title>
+    <title>Grafik Garis Penjualan Bulanan</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js" defer></script>
-    <style>
-        #chart-container {
-            position: relative;
-            height: 70vh;
-            width: 90vw;
-        }
-    </style>
 </head>
 <body>
-    <div id="chart-container">
-        <canvas id="profitChart"></canvas>
-    </div>
+    <canvas id="myChart" width="400" height="200"></canvas>
+    <script src="script.js"></script>
 </body>
 </html>
 
 <script>
     const DataUrl = 'http://localhost:3000/data';
 
-// Fungsi untuk memuat data dari file JSON
-async function fetchData(url) {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    return data;
+// Ambil data dari json
+function fetchData(url) {
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
 }
 
-// Fungsi untuk memformat data menjadi total sales dan profit per kategori
-function formatDataForProfitAndSales(data) {
-    const categoryData = {};
+// Proses dan buat grafik garis
+fetchData(DataUrl).then(data => {
+    if (!data) {
+        console.error('No data retrieved');
+        return;
+    }
+
+    // Objek untuk menyimpan total penjualan per bulan
+    const salesPerMonth = {};
 
     data.forEach(order => {
-        const category = order.Category;
-        const sales = parseFloat(order.Sales.replace(/[^0-9.-]+/g, ""));
-        const profit = parseFloat(order.Profit.replace(/[^0-9.-]+/g, ""));
+        // Ambil bulan dan tahun dari Order Date
+        const orderDate = new Date(order['Order Date']);
+        const month = orderDate.getMonth(); // Bulan (0-11)
+        const year = orderDate.getFullYear(); // Tahun
 
-        if (!categoryData[category]) {
-            categoryData[category] = { sales: 0, profit: 0 };
+        // Format kunci bulan-tahun
+        const monthYearKey = `${year}-${String(month + 1).padStart(2, '0')}`; // Bulan ditambah 1 agar 1-12 dan di padStart untuk 2 digit
+
+        // Hapus '$' dan ',' dari string penjualan, lalu konversi ke float
+        const sales = parseFloat(order.Sales.replace(/[$,]/g, ''));
+
+        // Jika kunci bulan-tahun belum ada, inisialisasi dengan nilai awal
+        if (!salesPerMonth[monthYearKey]) {
+            salesPerMonth[monthYearKey] = 0;
         }
 
-        categoryData[category].sales += sales;
-        categoryData[category].profit += profit;
+        // Tambahkan penjualan ke kunci bulan-tahun
+        salesPerMonth[monthYearKey] += sales;
     });
 
-    return categoryData;
-}
+    // Sortir kunci bulan-tahun
+    const sortedKeys = Object.keys(salesPerMonth).sort((a, b) => new Date(a) - new Date(b));
+    const sortedSales = sortedKeys.map(key => salesPerMonth[key]);
 
-// Fungsi untuk membuat chart
-async function createChart() {
-    const data = await fetchData(DataUrl);
-    const formattedData = formatDataForProfitAndSales(data);
-
-    const labels = Object.keys(formattedData);
-    const salesData = Object.values(formattedData).map(entry => entry.sales);
-    const profitData = Object.values(formattedData).map(entry => entry.profit);
-
-    const ctx = document.getElementById('profitChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
+    // Buat grafik garis
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'line',
         data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Sales',
-                    data: salesData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Profit',
-                    data: profitData,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }
-            ]
+            labels: sortedKeys,
+            datasets: [{
+                label: 'Total Penjualan',
+                data: sortedSales,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false,
+                tension: 0.1
+            }]
         },
         options: {
-            indexAxis: 'y', // Mengatur chart menjadi horizontal
-            responsive: true,
             scales: {
                 x: {
+                    type: 'time',
+                    time: {
+                        unit: 'month',
+                        tooltipFormat: 'MMM YYYY',
+                        displayFormats: {
+                            month: 'MMM YYYY'
+                        }
+                    }
+                },
+                y: {
                     beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true
                 }
             }
         }
     });
-}
-
-// Membuat chart setelah halaman selesai dimuat
-window.addEventListener('load', createChart);
+}).catch(error => {
+    console.error('Error fetching or processing data:', error);
+});
 
 </script>

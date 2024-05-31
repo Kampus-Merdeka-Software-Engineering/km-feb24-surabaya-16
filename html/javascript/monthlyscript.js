@@ -107,58 +107,64 @@ function postDataCard() {
 
 //------------------------------------------------- KALAU MAU TAMBAH CHART DISINI!!!!! ------------------------------------------------
 
-//------------------------------------------------- CHART TOTAL SALES DAN PROFIT------------------------------------------------
-// Fungsi untuk menghitung total sales dan total profit
-function calculateSalesProfit(data) {
-    let totalSales = 0;
+//------------------------------------------------- CHART TOTAL SALES DAN PROFIT ROW 1 LEFT------------------------------------------------
+// Proses dan buat diagram
+fetchData(DataUrl).then(data => {
+    // Asumsikan data adalah array dari pesanan
+    let totalPenjualan = 0;
     let totalProfit = 0;
 
-    data.forEach(item => {
-        totalSales += parseFloat(item.Sales.replace("$", "").replace(",", ""));
-        totalProfit += parseFloat(item.Profit.replace("$", "").replace(",", ""));
+    data.forEach(pesanan => {
+        // Hapus '$' dan ',' dari string penjualan dan profit, lalu konversi ke float
+        let penjualan = parseFloat(pesanan.Sales.replace(/[$,]/g, ''));
+        let profit = parseFloat(pesanan.Profit.replace(/[$,]/g, ''));
+
+        totalPenjualan += penjualan;
+        totalProfit += profit;
     });
 
-    return {
-        totalSales: totalSales,
-        totalProfit: totalProfit
-    };
-}
-
-// Membuat chart
-async function createChart() {
-    const data = await fetchData(DataUrl);
-    const { totalSales, totalProfit } = calculateSalesProfit(data);
-
-    const ctx = document.getElementById('salesProfitChart').getContext('2d');
-    const myChart = new Chart(ctx, {
+    // Buat diagram batang
+    const ctx = document.getElementById('totalChart').getContext('2d');
+    const totalChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Total Sales', 'Total Profit'],
+            labels: ['Total Penjualan', 'Total Profit'],
             datasets: [{
-                label: 'Amount ($)',
-                data: [totalSales, totalProfit],
-                backgroundColor: [
-                    'orange',
-                    'black',
-                ],
-                
+                label: 'Penjualan',
+                data: [totalPenjualan, 0], // Penjualan pada label pertama
+                backgroundColor: 'orange',
+                borderColor: 'orange',
+                borderWidth: 1
+            }, {
+                label: 'Profit',
+                data: [0, totalProfit], // Profit pada label kedua
+                backgroundColor: 'black',
+                borderColor: 'black',
+                borderWidth: 1
             }]
         },
         options: {
             scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
+                x: {
+                    stacked: true,
+                },
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: 'black'
                     }
-                }]
+                }
             }
         }
     });
-}
+});
 
-// Panggil fungsi untuk membuat chart
-createChart();
-// ------------------------------------- BARCHART STATE HIGHEST SALES -------------------------------------
+// ------------------------------------- BARCHART 10 STATE HIGHEST SALES ROW 1 RIGHT -------------------------------------
 // Fungsi untuk memproses data penjualan dan mendapatkan negara bagian dengan penjualan tertinggi
 // Fetch data from the URL
 fetchData(DataUrl).then(data => {
@@ -214,7 +220,7 @@ fetchData(DataUrl).then(data => {
 
 
 
-//-------------------------------- LINE CHART MONTHLY SALES PERFORMANCE ----------------------------------
+//-------------------------------- LINE CHART MONTHLY SALES PERFORMANCE ROW 2 ----------------------------------
 // Fungsi untuk memproses data penjualan bulanan
 const preprocessData = (data) => {
     const result = {};
@@ -298,12 +304,72 @@ fetch(DataUrl)
     })
     .catch(error => console.error('Error fetching data:', error));
 
-    //------------------------------------------------ Most Profitable Category------------------------------------------------
-// Fungsi untuk memformat data menjadi keuntungan per kategori
+    //------------------------------------------------ Most Profitable Category ROW 3 LEFT ------------------------------------------------
+// Proses dan buat diagram
+fetchData(DataUrl).then(data => {
+    // Objek untuk menyimpan total penjualan dan profit per kategori
+    const categories = {};
+
+    data.forEach(pesanan => {
+        const category = pesanan.Category;
+
+        // Hapus '$' dan ',' dari string penjualan dan profit, lalu konversi ke float
+        const penjualan = parseFloat(pesanan.Sales.replace(/[$,]/g, ''));
+        const profit = parseFloat(pesanan.Profit.replace(/[$,]/g, ''));
+
+        // Jika kategori belum ada, inisialisasi dengan nilai awal
+        if (!categories[category]) {
+            categories[category] = { totalPenjualan: 0, totalProfit: 0 };
+        }
+
+        // Tambahkan penjualan dan profit ke kategori
+        categories[category].totalPenjualan += penjualan;
+        categories[category].totalProfit += profit;
+    });
+
+    // Ekstraksi kategori, total penjualan dan total profit ke dalam array terpisah
+    const categoryLabels = Object.keys(categories);
+    const totalPenjualanData = categoryLabels.map(category => categories[category].totalPenjualan);
+    const totalProfitData = categoryLabels.map(category => categories[category].totalProfit);
+
+    // Buat diagram batang horizontal
+    const ctx = document.getElementById('totalCategory').getContext('2d');
+    const totalCategory = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: categoryLabels,
+            datasets: [
+                {
+                    label: 'Total Penjualan',
+                    data: totalPenjualanData,
+                    backgroundColor: 'orange',
+                    borderColor: 'range',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Total Profit',
+                    data: totalProfitData,
+                    backgroundColor: 'black',
+                    borderColor: 'black',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
 
 
 
-//------------------------------------------------ The most Profitable and Highest Sales------------------------------------------------
+
+//------------------------------------------------ The most Profitable and Highest Sales ROW 3 RIGHT------------------------------------------------
 // Ambil data dari JSON
 function fetchData(url) {
     return fetch(url)
@@ -394,7 +460,7 @@ async function createChart() {
 // Panggil fungsi untuk membuat chart
 createChart();
 
-//------------------------------------------------ BARCHART SUB CATEGORY TERTINGGI SALES ------------------------------------------------
+//------------------------------------------------ BARCHART SUB CATEGORY TERTINGGI SALES ROW 4 LEFT ------------------------------------------------
 // Fetch data from the URL
  // Fetch data from the URL
  fetchData(DataUrl).then(data => {
@@ -458,7 +524,7 @@ fetch(DataUrl)
     .catch(error => console.error('Error fetching data:', error));
 
 
-// ------------------------------------- BARCHART STATE HIGHEST PROFIT -------------------------------------
+// ------------------------------------- BARCHART STATE HIGHEST PROFIT ROW 4 RIGHT-------------------------------------
 // Fungsi untuk memproses data profit dan mendapatkan profit per negara bagian
 // Fetch data from the URL
 fetchData(DataUrl).then(data => {
