@@ -1,164 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stacked Bar Chart of Sales</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.3.2/dist/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>Dropdown with Checkbox Options</title>
+    <style>
+        .dropdown-checkbox {
+            position: relative;
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .dropdown-checkbox .dropdown-toggle {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .dropdown-checkbox .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 10px;
+            display: none;
+            z-index: 1;
+            width: 200px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        .dropdown-checkbox .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-checkbox .checkbox-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .dropdown-checkbox .checkbox-list label {
+            display: block;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .dropdown-checkbox .checkbox-list label:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-checkbox .checkbox-list input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .dropdown-checkbox .search-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="StackedBarChartSalesPerState" width="400" height="200"></canvas>
-    <button id="downloadPDF">Download as PDF</button>
+    <div class="dropdown-checkbox">
+        <button class="dropdown-toggle" type="button" id="categoryButton">
+            Select Category
+        </button>
+        <div class="dropdown-menu" aria-labelledby="categoryButton">
+            <div class="checkbox-list" id="categoryOptions">
+                <!-- Categories will be dynamically populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="dropdown-checkbox">
+        <button class="dropdown-toggle" type="button" id="segmentButton">
+            Select Segment
+        </button>
+        <div class="dropdown-menu" aria-labelledby="segmentButton">
+            <div class="checkbox-list" id="segmentOptions">
+                <!-- Segments will be dynamically populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="dropdown-checkbox">
+        <button class="dropdown-toggle" type="button" id="stateButton">
+            Select State
+        </button>
+        <div class="dropdown-menu" aria-labelledby="stateButton">
+            <input type="text" class="search-input" placeholder="Search...">
+            <div class="checkbox-list" id="stateOptions">
+                <!-- States will be dynamically populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
-        const DataUrl = 'http://localhost:3000/data';
-        const colorPalette = ['#1B1A17', '#F0A500', '#E45826', '#E6D5B8'];
+        $(document).ready(function() {
+            const DataUrl = 'http://localhost:3000/data'; // URL to fetch data from
 
-        // Function to fetch data from the given URL
-        function fetchData(url) {
-            return fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
-        }
-
-        // Function to process data and calculate sales per category in each state
-        function processStackedBarChartSalesDataPerCategory(data) {
-            const SalesDataPerCategory = {};
-
-            data.forEach(item => {
-                const state = item["State"];
-                const category = item["Category"];
-                const sales = parseFloat(item["Sales"].replace('$', '').replace(',', '.'));
-
-                if (!SalesDataPerCategory[state]) {
-                    SalesDataPerCategory[state] = {};
-                }
-                if (SalesDataPerCategory[state][category]) {
-                    SalesDataPerCategory[state][category] += sales;
-                } else {
-                    SalesDataPerCategory[state][category] = sales;
-                }
-            });
-
-            return SalesDataPerCategory;
-        }
-
-        // Function to prepare chart data for Chart.js
-        function prepareStackedChartData(SalesDataPerCategory) {
-            const states = Object.keys(SalesDataPerCategory);
-            const categories = new Set();
-
-            states.forEach(state => {
-                Object.keys(SalesDataPerCategory[state]).forEach(category => {
-                    categories.add(category);
-                });
-            });
-
-            const totalSalesByState = states.map(state => {
-                return {
-                    state: state,
-                    totalSales: Object.values(SalesDataPerCategory[state]).reduce((a, b) => a + b, 0)
-                };
-            });
-
-            totalSalesByState.sort((a, b) => b.totalSales - a.totalSales);
-
-            // Select top 10 states by total sales
-            const topStates = totalSalesByState.slice(0, 10).map(item => item.state);
-
-            const datasets = Array.from(categories).map((category, index) => {
-                return {
-                    label: category,
-                    data: topStates.map(state => SalesDataPerCategory[state][category] || 0),
-                    backgroundColor: colorPalette[index % colorPalette.length]
-                };
-            });
-
-            return {
-                labels: topStates,
-                datasets: datasets
-            };
-        }
-
-        let StackedBarChart = null;
-
-        function createStackedBarChart(chartData) {
-            const ctxSBC = document.getElementById('StackedBarChartSalesPerState').getContext('2d');
-            if (StackedBarChart != null) {
-                StackedBarChart.data = chartData;
-                return StackedBarChart.update();
+            // Function to fetch data from URL
+            function fetchData(url) {
+                return fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
             }
 
-            StackedBarChart = new Chart(ctxSBC, {
-                type: 'bar',
-                data: chartData,
-                options: {
-                    scales: {
-                        x: {
-                            stacked: true
-                        },
-                        y: {
-                            stacked: true,
-                            beginAtZero: true
+            // Function to populate dropdown options
+            function populateDropdownOptions(options, containerId) {
+                const container = $('#' + containerId);
+                container.empty(); // Clear existing options
+                
+                // Add other options
+                options.forEach(option => {
+                    const label = $('<label>');
+                    const checkbox = $('<input>').attr({
+                        type: 'checkbox',
+                        value: option,
+                    });
+                    label.append(checkbox, option);
+                    container.append(label);
+                });
+            }
+
+            // Event listener for dropdown toggle
+            $('.dropdown-checkbox .dropdown-toggle').click(function() {
+                $(this).next('.dropdown-menu').toggleClass('show');
+
+                // Fetch data and populate dropdown options
+                const dropdownId = $(this).attr('id');
+                const optionsId = dropdownId.replace('Button', 'Options');
+
+                fetchData(DataUrl)
+                    .then(data => {
+                        let options;
+                        switch (dropdownId) {
+                            case 'categoryButton':
+                                options = [...new Set(data.map(row => row.Category))];
+                                break;
+                            case 'segmentButton':
+                                options = [...new Set(data.map(row => row.Segment))];
+                                break;
+                            case 'stateButton':
+                                options = [...new Set(data.map(row => row.State))];
+                                break;
+                            default:
+                                options = [];
+                                break;
                         }
-                    }
-                }
+                        populateDropdownOptions(options, optionsId);
+                    })
+                    .catch(error => {
+                        console.error('Failed to fetch data:', error);
+                    });
             });
-        }
 
-        // Dummy filter function - replace with actual filter logic if needed
-        function applyFilters(data) {
-            // Add your filter logic here, for now it returns the data unfiltered
-            return data;
-        }
-
-        // Fetch, process, and render the data
-        function filterStackedBarChart() {
-            fetchData(DataUrl).then(data => {
-                if (data) {
-                    const filteredData = applyFilters(data);
-                    const SalesDataPerCategory = processStackedBarChartSalesDataPerCategory(filteredData);
-                    const chartData = prepareStackedChartData(SalesDataPerCategory);
-                    createStackedBarChart(chartData);
-                }
+            // Event listener for search input (only for the State dropdown)
+            $('#stateButton').click(function() {
+                $('.search-input').val(''); // Clear search input
+                filterDropdownOptions(''); // Show all options initially
             });
-        }
 
-        // Initial call to load the chart
-        filterStackedBarChart();
+            $('.search-input').keyup(function() {
+                const searchText = $(this).val();
+                filterDropdownOptions(searchText);
+            });
 
-        // Function to download the page as a PDF
-        document.getElementById('downloadPDF').addEventListener('click', function () {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            html2canvas(document.body).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = 210; // A4 width in mm
-                const pageHeight = 295; // A4 height in mm
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                let heightLeft = imgHeight;
-                let position = 0;
-
-                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    doc.addPage();
-                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
+            // Close the dropdown if the user clicks outside of it
+            $(window).click(function(event) {
+                if (!$(event.target).closest('.dropdown-checkbox').length) {
+                    $('.dropdown-menu').removeClass('show');
                 }
-
-                doc.save('page.pdf');
             });
         });
     </script>

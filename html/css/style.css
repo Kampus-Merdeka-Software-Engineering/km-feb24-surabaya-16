@@ -132,7 +132,7 @@ body{
   width: 100%;
   height: auto;
   text-align: center;
-  padding: 10px 30px;
+  padding: 15px 30px;
   text-decoration: none;
   font-size: 12px;
   background-color: rgb(230, 230, 230);
@@ -358,6 +358,56 @@ th {
 #dataTable {
   width: 100% !important; /* Ensure the table takes full width of the modal */
 }
+
+    /* ----------------------------------Modal styles --------------------------------*/
+    body.modal-open {
+      overflow: hidden;
+  }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+  }
+  .modal-dialog {
+      margin: 2% auto;
+      padding: 25px;
+      width: 95%;
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  .modal-header, .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e5e5;
+  }
+  .modal-header {
+      border-bottom: none;
+  }
+  .modal-body {
+      padding: 5px;
+  }
+  .close {
+      font-size: 1.5rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+  }
+  .btn-secondary {
+      padding: 10px 20px;
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+  }
 
 @media screen and (max-width: 768px) {
   /* Ketika lebar layar kurang dari atau sama dengan 768px */

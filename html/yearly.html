@@ -162,11 +162,11 @@
         
 
     <!-- Modal -->
-    <div class="modal fade" id="dataTableModal" tabindex="-1" role="dialog" aria-labelledby="dataTableModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+    <div class="modal" id="dataTableModal" tabindex="-1" role="dialog" aria-labelledby="dataTableModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="dataTableModalLabel">Data Table</h5>
+                    <h5 class="modal-title" id="dataTableModalLabel">Superstore Sales</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -271,38 +271,3 @@
      });
 </script>
 
-
-<script>
-    // Include the html2canvas and jsPDF libraries in the download.js script
-document.write('<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.3.2/dist/html2canvas.min.js"><\/script>');
-document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>');
-
-// Function to download the page as a PDF
-document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('downloadPDF').addEventListener('click', function () {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        html2canvas(document.body).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const imgWidth = 210; // A4 width in mm
-            const pageHeight = 295; // A4 height in mm
-            const imgHeight = canvas.height * imgWidth / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 0;
-
-            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                doc.addPage();
-                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-
-            doc.save('page.pdf');
-        });
-    });
-});
-</script>
