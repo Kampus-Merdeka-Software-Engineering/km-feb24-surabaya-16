@@ -6,10 +6,12 @@ h1, h2, h3, h4, h5, h6 {
 .judul{
   font-size: 18px !important;
 }
+
 b{
   font-family: 'Roboto', sans-serif;
   font-size: 17px;
 }
+
 body{
   font-family: 'Roboto', sans-serif;
   font-size: 12;
@@ -23,11 +25,10 @@ body{
   margin-bottom: -2%;
 }
 .footer {
+  background: #f3f3f3;
   bottom: 0;
-  width: 100%;
   background-color: #222;
   color: #fff;
-  padding: 10px 0;
   text-align: center;
  }
 
