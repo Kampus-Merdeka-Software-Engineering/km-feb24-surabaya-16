@@ -2,6 +2,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Roboto', sans-serif;
   font-size: 26px;
 }
+
 .judul{
   font-size: 18px !important;
 }
@@ -21,7 +22,19 @@ body{
   padding-top: 1%;
   margin-bottom: -2%;
 }
+.footer {
+  bottom: 0;
+  width: 100%;
+  background-color: #222;
+  color: #fff;
+  padding: 10px 0;
+  text-align: center;
+ }
 
+.footer-bottom {
+  background-color: #222;
+  padding: 5px 0;
+}
 /*========================================================= HEADER ========================================*/
 .image-responsive{
   width: 100%;
@@ -30,18 +43,9 @@ body{
 .topnav-container {
     background-color: white;
     overflow: hidden;
-
   }
 
-.navbar-nav .nav-link:hover {
-    background-color: transparent !important;
-    color: inherit !important;
-    pointer-events: none;
-}
-
-.nav-text-disabled .nav-link_judul:hover  {
-  color: black !important;
-}
+  
   
   /* Style the links inside the navigation bar */
   .topnav-a {
@@ -245,8 +249,9 @@ select::-ms-expand {
 /*========================================================= SLIDER ========================================*/
 .skorcard{
   position: flex;
-  width: 100%;
+  width: 97.8%;
   left: 0;
+  align-content: center;
 }
 .cards{
   width: 100%;
@@ -283,6 +288,7 @@ select::-ms-expand {
 /*=========================================================  ========================================*/
 .chartContainer{
   display: flex;
+  flex-direction: row;
   flex: 1;
 }
 .left {
@@ -309,7 +315,12 @@ canvas {
 
 .line-chart{
   width: 100%;
+  margin-bottom: 20px;
   margin-left: 20px;
+}
+.lineCustom{
+  width: 100%;
+  height: 100%;
 }
 
 h2 {
@@ -411,13 +422,65 @@ th {
 
 @media screen and (max-width: 768px) {
   /* Ketika lebar layar kurang dari atau sama dengan 768px */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+  }
+  .judul{
+  font-size: 16px !important;
+  }
+  b{
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
+  }
+  body{
+    font-family: 'Roboto', sans-serif;
+    font-size: 10;
+  }
+  .header-cust {
+    text-align: center;
+  }
+  .header-container {
+    display:flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-bottom: 2em;
+  }
+  .topnav-special {
+    float: left;
+    color: black;
+    text-align: left;
+    text-decoration: none;
+    font-size: 17px;
+  }
+  .chartContainer{
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+  .BarChartSalesCategoryCustom{
+    height: 50px;
+  }
   .cards {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Menyesuaikan jumlah kolom dan lebar kartu */
     grid-gap: 10px; /* Mengurangi jarak antara kartu */
+    padding: 10px;
   }
-
+  .skorcard {
+    width: 95%;
+  }
   .topnav-logo {
     display: none;
+  }
+  .footer-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-left, .footer-center, .footer-right {
+      margin: 20px 0;
   }
 }
 
